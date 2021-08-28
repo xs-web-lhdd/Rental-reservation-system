@@ -4,13 +4,27 @@
       <img src="../assets/images/logo.png" class="header__img">
       <span class="header__desc">服务中心预约系统</span>
     </div>
+    <!-- 轮播图 -->
+    <Swiper/>
+    <!-- 房间介绍 -->
+    <List message="卧室列表"/>
+    <Room/>
+    <!-- 会议室介绍 -->
+    <List message="会议室列表"/>
+    <Room/>
+    <!-- 关于 -->
+    <About/>
   </div>
 </template>
 
 <script>
-
+import Swiper from '../components/Swiper.vue'
+import List from '../components/List.vue'
+import Room from '../components/Room.vue'
+import About from '../components/About.vue'
 export default {
-  name: 'Home'
+  name: 'Home',
+  components: { Swiper, List, Room, About }
 }
 </script>
 
