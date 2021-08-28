@@ -1,29 +1,34 @@
 <template>
-    <van-row justify="start">
-      <van-col span="10" class="item">
+  <van-row justify="start">
+    <van-col span="10" class="item" v-for="item in List" :key="item.roomId">
+      <router-link
+        :to="`/about/${item.roomId}`"
+      >
         <img class="item__img" src="../assets/images/1.jpg" alt="">
-        <div class="item__title">单间</div>
-        <div class="item__price">￥ 100</div>
-        <div class="item__num">余量 100</div>
-      </van-col>
-      <van-col span="10" class="item">
-        <img class="item__img" src="../assets/images/1.jpg" alt="">
-        <div class="item__title">单间</div>
-        <div class="item__price">￥ 100</div>
-        <div class="item__num">余量 100</div>
-      </van-col>
-      <van-col span="10" class="item">
-        <img class="item__img" src="../assets/images/1.jpg" alt="">
-        <div class="item__title">单间</div>
-        <div class="item__price">￥ 100</div>
-        <div class="item__num">余量 100</div>
-      </van-col>
-    </van-row>
+        <div class="item__title">{{item.roomName}}</div>
+        <div class="item__price">￥{{item.roomPrices}}</div>
+        <div class="item__num">余量 {{item.totalNum}}</div>
+      </router-link>
+    </van-col>
+  </van-row>
 </template>
 
 <script>
+import { ref, onMounted } from 'vue'
+import { get } from '../util/request'
+const List = ref([])
 export default {
-  name: 'Room'
+  name: 'Room',
+  setup () {
+    onMounted(() => {
+      getAllList()
+    })
+    const getAllList = async () => {
+      const res = await get('list')
+      List.value = res.data.list
+    }
+    return { getAllList, List }
+  }
 }
 </script>
 

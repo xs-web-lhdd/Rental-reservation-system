@@ -9,9 +9,6 @@
     <!-- 房间介绍 -->
     <List message="卧室列表"/>
     <Room/>
-    <!-- 会议室介绍 -->
-    <List message="会议室列表"/>
-    <Room/>
     <!-- 关于 -->
     <About/>
   </div>
