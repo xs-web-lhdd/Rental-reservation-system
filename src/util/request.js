@@ -3,7 +3,7 @@ import axios from 'axios'
 // 创建一个axios的实例：
 const instance = axios.create({
   // baseURl会自动将请求地址拼到url前面
-  baseURL: 'http://159.75.112.81:8082/dqroom',
+  baseURL: 'http://159.75.112.81:8082/',
   withCredentials: true,
   timeout: 10000
 })

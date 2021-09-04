@@ -18,6 +18,13 @@
       <hr class="content__line"/>
       <div class="content__desc">{{messageList[0]?.introduce}}</div>
     </div>
+    <!-- 房间号码选择 -->
+    <div class="roomNum">
+      <div class="roomNum__title">房间号码</div>
+      <div class="roomNum__content">
+        <div v-for="item in roomNumList" :key="item" class="roomNum__tag" @click="handleOrder">{{item}}</div>
+      </div>
+    </div>
     <div class="bottom">
       <img src="../assets/images/logo.png" class="bottom__img">
       <p class="bottom__desc">
@@ -56,10 +63,15 @@ export default {
     // 获取路由id
     const route = useRoute()
     const getAllList = async () => {
-      const res = await get('list')
-      messageList.value = res.data.list.filter(item => item.roomId.toString() === route.params.id)
+      const res = await get('dqroom/list')
+      messageList.value = res.data.filter(item => item.roomId.toString() === route.params.id)
+      // 根据id获取房间号码
+      const result = await get(`dqroom/roomnumber?roomId=${route.params.id}`)
+      roomNumList.value = result.data
     }
-    return { message, messageList, handleOrder, handleBack }
+    // 获取
+    const roomNumList = ref([])
+    return { message, messageList, handleOrder, handleBack, roomNumList }
   }
 }
 </script>
@@ -72,6 +84,9 @@ export default {
 }
 .wrapper{
   background-color: #f1f1f1;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
 }
 .item{
   background-color: #fff;
@@ -106,10 +121,10 @@ export default {
   background: white;
   display: flex;
   flex-direction: column;
-  margin-top: 20px;
-  padding: 15px;
+  margin-top: .2rem;
+  padding: .15rem;
   box-sizing: border-box;
-  height: 4rem;
+  height: 2rem;
   &__title{
     font-size: 0.16rem;
     letter-spacing: .02rem;
@@ -135,9 +150,6 @@ export default {
   position: absolute;
   z-index: 999;
   bottom: 0;
-  left: 0;
-  right: 0;
-  height: .5rem;
   &__img{
     margin: 0 .2rem;
     width: .5rem;
@@ -154,11 +166,42 @@ export default {
     width: 40%;
     background: #ff4400;
     color: white;
-    font-size: 18px;
+    font-size: .18rem;
     text-align: center;
-    letter-spacing: 5px;
-    line-height: 50px;
+    letter-spacing: .05rem;
+    line-height: .5rem;
     font-weight: bold;
+  }
+}
+.roomNum{
+  width: 100%;
+  background: white;
+  // display: flex;
+  flex-direction: column;
+  margin-top: .2rem;
+  padding: .15rem;
+  box-sizing: border-box;
+  height: 3rem;
+  &__title{
+    font-size: 0.16rem;
+    letter-spacing: .02rem;
+    padding: .03rem;
+    box-sizing: border-box;
+    border-bottom: 0.5px solid #8888;
+    padding-bottom: .08rem;
+    margin-bottom: .1rem;
+  }
+  &__content{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  &__tag{
+    width: .6rem;
+    font-size: .15rem;
+    border: 1px solid #1989fa;
+    text-align: center;
+    border-radius: .1rem;
+    margin: .05rem .1rem;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="wraper">
     <img class="img1" src="../assets/images/float.png">
     <span class="desc">{{message}}</span>
     <img class="img2" src="../assets/images/float.png">
@@ -14,7 +14,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wrapper{
+.wraper{
   height: .6rem;
   background-color: #f1f1f1;
   display: flex;

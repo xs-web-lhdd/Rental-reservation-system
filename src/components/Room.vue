@@ -24,8 +24,8 @@ export default {
       getAllList()
     })
     const getAllList = async () => {
-      const res = await get('list')
-      List.value = res.data.list
+      const res = await get('/dqroom/list')
+      List.value = res.data
     }
     return { getAllList, List }
   }
