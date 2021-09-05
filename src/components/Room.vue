@@ -1,10 +1,10 @@
 <template>
   <van-row justify="start">
-    <van-col span="10" class="item" v-for="item in List" :key="item.roomId">
+    <van-col span="10" class="item" v-for="item in roomList" :key="item.roomId">
       <router-link
         :to="`/about/${item.roomId}`"
       >
-        <img class="item__img" src="../assets/images/1.jpg" alt="">
+        <img class="item__img" :src="item.roomImage" alt="">
         <div class="item__title">{{item.roomName}}</div>
         <div class="item__price">￥{{item.roomPrices}}</div>
         <div class="item__num">余量 {{item.totalNum}}</div>
@@ -14,20 +14,22 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
-import { get } from '../util/request'
-const List = ref([])
+// import { ref, onMounted } from 'vue'
+// import { get } from '../util/request'
+// const List = ref([])
 export default {
   name: 'Room',
+  props: ['roomList'],
   setup () {
-    onMounted(() => {
-      getAllList()
-    })
-    const getAllList = async () => {
-      const res = await get('/dqroom/list')
-      List.value = res.data
-    }
-    return { getAllList, List }
+    // onMounted(() => {
+    //   // getAllList()
+    // })
+    // const getAllList = async () => {
+    //   const res = await get('/dqroom/list')
+    //   console.log(res)
+    //   List.value = res.data
+    // }
+    // return { getAllList, List }
   }
 }
 </script>
@@ -40,6 +42,7 @@ export default {
   margin-bottom: .1rem;
   &__img{
     width: 100%;
+    height: 55%;
   }
   &__title{
     color: #000000;

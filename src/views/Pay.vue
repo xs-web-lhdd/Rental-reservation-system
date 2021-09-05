@@ -22,7 +22,6 @@
         />
         <van-field title="选择预定的房间类型" placeholder="请选择房间类型" @click="type = true" v-model="roomType" label="房间类型" />
         <van-field title="请选择房间号码" placeholder="请选择房间号码" @click="handleChoiceNum" v-model="roomNumChoice" label="房间号码" />
-        <van-field v-model="roomNum" type="digit" placeholder="请输入房间数量" label="房间数量" />
         <van-field type="digit" label="开始时间" @click="() => handleTime(0)"/>
         <van-field type="digit" label="结束时间" @click="() => handleTime(1)"/>
         <van-datetime-picker
@@ -76,10 +75,6 @@ export default {
         Toast('请选择房间类型')
         return
       }
-      if (!roomNum.value) {
-        Toast('请输入房间数量')
-        return
-      }
       if (!roomNumChoice.value) {
         Toast('请选择房间号码')
         return
@@ -91,11 +86,10 @@ export default {
       if (canOrder.value === 1) {
         Toast('暂不能预约，请更换预约时间或者房间号')
       }
-      const res = await post('/bookroom', {
-        roomName: roomType.value,
+      const res = await post('dqbook/book', {
+        roomId: roomId.value,
         username: username.value,
         phone: phone.value,
-        roomNum: roomNum.value,
         bookDate: bookData.value,
         endDate: endData.value
       })
@@ -105,6 +99,7 @@ export default {
     const id = ref(null)
     const type = ref(false) // 展示与否
     const roomType = ref(null)
+    const roomId = ref(null)
     const columnsType = ['普通标准间', '舒适标准间', '豪华标准间', '豪华大床房', '豪华套房']
     const onConfirmA = async (value, index) => {
       roomType.value = value
@@ -136,7 +131,7 @@ export default {
       }
     }
     // 房间号码
-    const handleChoiceNum = () => {
+    const handleChoiceNum = (index) => {
       if (!roomType.value) {
         Toast('请先选择房间类型')
         return
@@ -148,8 +143,6 @@ export default {
       numChoice.value = false
       show.value = false
     }
-    // 房间数量
-    const roomNum = ref(null)
     // 后退
     const router = useRouter()
     const handleBack = () => {
@@ -160,6 +153,7 @@ export default {
     const roomNumChoice = ref(null)
     const columnsNumber = ref([])
     const onConfirmB = (value, index) => {
+      roomId.value = value
       roomNumChoice.value = value
       numChoice.value = false
     }
@@ -206,7 +200,7 @@ export default {
       }
     }
 
-    return { handleChoiceNum, currentDate, minDate, handleSubmitTime, maxDate, show, handleTime, message, roomType, roomNum, numChoice, roomNumChoice, username, phone, handleSubmit, columnsType, columnsNumber, onCancel, onConfirmA, onConfirmB, type, handleBack }
+    return { handleChoiceNum, currentDate, minDate, handleSubmitTime, maxDate, show, handleTime, message, roomType, numChoice, roomNumChoice, username, phone, handleSubmit, columnsType, columnsNumber, onCancel, onConfirmA, onConfirmB, type, handleBack }
   }
 }
 </script>

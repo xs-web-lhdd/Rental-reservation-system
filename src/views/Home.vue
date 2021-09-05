@@ -5,27 +5,60 @@
       <span class="header__desc">服务中心预约系统</span>
     </div>
     <!-- 轮播图 -->
-    <Swiper/>
+    <Swiper :ImageList="ImageList"/>
     <!-- 房间介绍 -->
     <List message="卧室列表"/>
-    <Room/>
+    <Room :roomList="roomList" />
     <!-- 关于 -->
     <About/>
+    <!-- 我的图标 -->
+    <div class="iconfont mine" @click="handleMe">&#xe609;</div>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Swiper from '../components/Swiper.vue'
 import List from '../components/List.vue'
 import Room from '../components/Room.vue'
 import About from '../components/About.vue'
+import { get } from '../util/request'
+
+const roomList = ref([])
+const ImageList = ref([])
 export default {
   name: 'Home',
-  components: { Swiper, List, Room, About }
+  components: { Swiper, List, Room, About },
+  setup () {
+    const getAllList = async () => {
+      const res = await get('/dqroom/list')
+      console.log(res)
+      roomList.value = res.data
+      ImageList.value = res.data.map(item => item.roomImage)
+    }
+    if (roomList.value.length === 0) {
+      // eslint-disable-next-line no-use-before-define
+      getAllList()
+    }
+    // 跳转到我的页面
+    const router = useRouter()
+    const handleMe = () => {
+      router.push('/mydetail')
+    }
+    return { roomList, ImageList, handleMe }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+.mine{
+  position: absolute;
+  top: .1rem;
+  right: .1rem;
+  font-size: .2rem;
+  color: #04be02;
+}
 .wrapper{
   background-color: #f1f1f1;
 }

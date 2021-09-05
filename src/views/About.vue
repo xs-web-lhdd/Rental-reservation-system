@@ -2,7 +2,7 @@
   <div class="wrapper">
     <div @click="handleBack" class="iconfont back">&#xe600;</div>
     <List :message="message"/>
-    <Swiper />
+    <Swiper :ImageList="roomDeatilImage"/>
     <div class="detail">
       <div class="item">
         <div class="item__title">{{messageList[0]?.roomName}}</div>
@@ -60,18 +60,20 @@ export default {
       router.back()
     }
     const messageList = ref([])
+    const roomDeatilImage = ref([])
     // 获取路由id
     const route = useRoute()
     const getAllList = async () => {
       const res = await get('dqroom/list')
       messageList.value = res.data.filter(item => item.roomId.toString() === route.params.id)
+      roomDeatilImage.value.push(messageList.value[0].roomImage)
       // 根据id获取房间号码
       const result = await get(`dqroom/roomnumber?roomId=${route.params.id}`)
       roomNumList.value = result.data
     }
     // 获取
     const roomNumList = ref([])
-    return { message, messageList, handleOrder, handleBack, roomNumList }
+    return { message, messageList, handleOrder, handleBack, roomNumList, roomDeatilImage }
   }
 }
 </script>
