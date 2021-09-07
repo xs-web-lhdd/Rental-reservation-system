@@ -33,7 +33,6 @@ export default {
   setup () {
     const getAllList = async () => {
       const res = await get('/dqroom/list')
-      console.log(res)
       roomList.value = res.data
       ImageList.value = res.data.map(item => item.roomImage)
     }

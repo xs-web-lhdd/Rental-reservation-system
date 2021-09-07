@@ -63,7 +63,6 @@ export default {
       if (res.code === 200) {
         Toast('查询成功')
         resultList.value = res.data
-        console.log(res.data)
         input.value = ''
       }
     }
