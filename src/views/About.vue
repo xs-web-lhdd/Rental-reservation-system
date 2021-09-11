@@ -19,12 +19,12 @@
       <div class="content__desc">{{messageList[0]?.introduce}}</div>
     </div>
     <!-- 房间号码选择 -->
-    <div class="roomNum">
+    <!-- <div class="roomNum">
       <div class="roomNum__title">房间号码</div>
       <div class="roomNum__content">
         <div v-for="item in roomNumList" :key="item" class="roomNum__tag" @click="handleOrder">{{item}}</div>
       </div>
-    </div>
+    </div> -->
     <div class="bottom">
       <img src="../assets/images/logo.png" class="bottom__img">
       <p class="bottom__desc">
@@ -126,7 +126,7 @@ export default {
   margin-top: .2rem;
   padding: .15rem;
   box-sizing: border-box;
-  height: 2rem;
+  height: 8rem;
   &__title{
     font-size: 0.16rem;
     letter-spacing: .02rem;

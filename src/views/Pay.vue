@@ -62,7 +62,7 @@ import { useRouter } from 'vue-router'
 import { Toast } from 'vant'
 import List from '../components/List.vue'
 import { ref, getCurrentInstance } from 'vue'
-import { post, get } from '../util/request'
+import { post } from '../util/request'
 import utils from '../util/utils'
 
 const message = '信息填写'
@@ -137,6 +137,7 @@ export default {
           return
         }
         bookDate.value = utils.formateDate(new Date(value))
+        console.log(bookDate.value)
         show.value = false
       }
       if (endOrstart.value === 1) {
@@ -150,9 +151,20 @@ export default {
       }
     }
     // 获取可用房间列表：
-    const canBookRoomList = ref([])
+    const timeNot = ref(null)
+    const canBookRoomList = ref([]) // 可用房间列表
     const getRoomList = async () => {
-      const res = await get(`dqbook/use?dqRoomId=${roomId.value}&bookDate=${bookDate.value}&endDate=${endDate.value}`)
+      // const res = await get(`dqbook/use?dqRoomId=${roomId.value}&bookDate=${bookDate.value}&endDate=${endDate.value}`)
+      const res = await post('dqbook/use', {
+        dqRoomId: roomId.value,
+        bookDate: bookDate.value,
+        endDate: endDate.value
+      })
+      if (res.code === 500) {
+        Toast(res.msg)
+        timeNot.value = false
+        return
+      }
       canBookRoomList.value = res.data
     }
     // 提交：
@@ -178,10 +190,14 @@ export default {
           Toast('请选择时间段')
           return
         }
-        if (canBookRoomList.value.length === 0) {
-          Toast('抱歉，暂时没有房间可以预定')
+        if (timeNot.value === false) {
+          Toast('这个时间段已经没有房间了哦')
           return
         }
+        // if (canBookRoomList.value.length === 0) {
+        //   Toast('抱歉，暂时没有房间可以预定')
+        //   return
+        // }
         if (roomNum.value > canBookRoomList.value.length) {
           Toast(`抱歉，最多只能预定${canBookRoomList.value.length}个房间`)
           return
