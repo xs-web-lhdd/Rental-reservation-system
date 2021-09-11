@@ -9,19 +9,22 @@
     </div>
     <div class="outcome">
       <div class="outcome__title">查询结果</div>
-      <div class="outcome__item" v-for="item in resultList" :key="item.roomId">
-        <div class="top">
-          <div class="iconfont outcome__item__icon">&#xe65a;</div>
-          <div class="outcome__item__type"><strong>{{formatRoomType(item.bookId)}}</strong></div>
-          <div class="outcome__item__userName">{{item.username}}</div>
-        </div>
-        <div class="middle">
-          <div class="outcome__item__phone">{{item.phone}}</div>
-          <div class="outcome__item__pay">{{item.roomId}}</div>
-        </div>
-        <div class="bottom">
-          <div class="outcome__item__bookDate">{{item.bookDate}}</div>
-          <div class="outcome__item__endDate">{{item.endDate}}</div>
+      <div class="outcome__contain">
+        <div class="outcome__item" v-for="item in resultList" :key="item.bookId">
+          <div class="top">
+            <div class="iconfont outcome__item__icon">&#xe65a;</div>
+            <!-- <div class="outcome__item__type"><strong>{{formatRoomType(item.bookId)}}</strong></div> -->
+            <div class="outcome__item__type"><strong>{{item.roomId}}</strong></div>
+            <div class="outcome__item__userName">{{item.username}}</div>
+          </div>
+          <div class="middle">
+            <div class="outcome__item__phone">{{item.phone}}</div>
+            <!-- <div class="outcome__item__pay">{{item.roomId}}</div> -->
+          </div>
+          <div class="bottom">
+            <div class="outcome__item__bookDate">{{item.bookDate}}</div>
+            <div class="outcome__item__endDate">{{item.endDate}}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -123,13 +126,16 @@ export default {
   margin-top: .3rem;
   width: 100vw;
   height: 6rem;
-  // background-color: #fff;
   &__title{
     font-size: .15rem;
     padding: 0 0 .1rem .1rem;
   }
+  &__contain{
+    background-color: #f1f1f1;
+    padding-bottom: .1rem;
+  }
   &__item{
-    margin: 0 auto;
+    margin: .1rem auto;
     width: 3.5rem;
     height: 1rem;
     background-color: #fff;

@@ -3,10 +3,12 @@
     <!-- 后退按钮 -->
     <div @click="handleBack" class="iconfont back">&#xe600;</div>
     <List :message="message"/>
-    <van-form @submit="onSubmit" ref="hello">
+    <van-form @submit="onSubmit" ref="message">
       <van-cell-group inset>
         <van-field
+          required
           v-model="username"
+          type="text"
           name="姓名"
           label="姓名"
           placeholder="请输入姓名"
@@ -14,7 +16,8 @@
         />
         <van-field
           v-model="phone"
-          type="phone"
+          required
+          type="tel"
           name="手机号"
           label="手机号"
           placeholder="请输入手机号"
@@ -23,10 +26,11 @@
             { pattern: /^1[3456789]\d{9}$/, message: '手机号码格式错误！'}
           ]"
         />
-        <van-field title="选择预定的房间类型" placeholder="请选择房间类型" @click="type = true" v-model="roomType" label="房间类型" />
-        <van-field title="请选择房间号码" placeholder="请选择房间号码" @click="handleChoiceNum" v-model="roomNumChoice" label="房间号码" />
-        <van-field type="data" v-model="bookData" placeholder="请选择开始预约时间" label="开始时间" @click="() => handleTime(0)"/>
-        <van-field type="data" v-model="endData" placeholder="请选择结束预约时间" label="结束时间" @click="() => handleTime(1)"/>
+        <van-field required disabled title="选择预定的房间类型" placeholder="请选择房间类型" @click="type = true" v-model="roomType" label="房间类型" />
+        <van-field required type="digit" label="房间数量" placeholder="请输入房间数量" v-model="roomNum"/>
+        <van-field required disabled v-model="bookDate" placeholder="请选择入住时间" label="入住时间" @click="() => handleBookTime('start')"/>
+        <van-field required disabled v-model="endDate" placeholder="请选择离店时间" label="离店时间" @click="() => handleBookTime('end')"/>
+        <van-field title="备注" v-model="remarks" placeholder="请输入备注" label="备注"/>
         <van-datetime-picker
           class="select"
           v-if="show"
@@ -35,20 +39,16 @@
           title="选择完整时间"
           :min-date="minDate"
           :max-date="maxDate"
-          @cancel="onCancel"
+          @cancel="() => onCancel('time')"
           @confirm="handleSubmitTime"
         />
       </van-cell-group>
       <!-- 遮罩层 -->
-      <div v-if="type || numChoice || show" class="face"></div>
+      <div v-if="type || show" class="face"></div>
       <div v-if="type">
-        <van-picker class="select" title="房间类型" :columns="columnsType" @confirm="onConfirmA" @cancel="onCancel"/>
-      </div>
-      <div v-if="numChoice">
-        <van-picker class="select" title="房间号" :columns="columnsNumber" @confirm="onConfirmB" @cancel="onCancel"/>
+        <van-picker class="select" title="房间类型" :columns="columnsType" @confirm="confirmRoomId" @cancel="() => onCancel('roomId')"/>
       </div>
       <div style="margin: .16rem;" class="submit">
-      <!-- <div style="margin: .16rem;" class="submit" @click="handleSubmit"> -->
         <van-button round block type="primary" native-type="submit">
           提交
         </van-button>
@@ -60,24 +60,104 @@
 <script>
 import { useRouter } from 'vue-router'
 import { Toast } from 'vant'
-import List from './../components/List.vue'
+import List from '../components/List.vue'
 import { ref, getCurrentInstance } from 'vue'
 import { post, get } from '../util/request'
 import utils from '../util/utils'
 
+const message = '信息填写'
 export default {
   name: 'Pay',
   components: { List },
   setup () {
     const { proxy } = getCurrentInstance()
-    const canOrder = ref(1)
-    const message = '信息填写'
-    // 用户名和手机号
-    const username = ref(null)
-    const phone = ref(null)
-    // 提交
-    onsubmit = async () => {
-      proxy.$refs.hello.validate().then(async () => {
+    const username = ref('')
+    const phone = ref('')
+    const bookDate = ref('')
+    const endDate = ref('')
+    const remarks = ref('')
+    // 选择房间类型：
+    const roomId = ref(null)
+    const type = ref(false) // 房间类型展示与否
+    const columnsType = ['普通标准间', '舒适标准间', '豪华标准间', '豪华大床房', '豪华套房']
+    // 确定房间类型：
+    const roomType = ref('')
+    const confirmRoomId = (value) => {
+      roomType.value = value
+      if (value === '普通标准间') {
+        roomId.value = 1
+      }
+      if (value === '舒适标准间') {
+        roomId.value = 2
+      }
+      if (value === '豪华标准间') {
+        roomId.value = 3
+      }
+      if (value === '豪华大床房') {
+        roomId.value = 4
+      }
+      if (value === '豪华套房') {
+        roomId.value = 5
+      }
+      // 关闭选择框
+      type.value = false
+    }
+    // 取消选择房间类型：
+    const onCancel = (value) => {
+      if (value === 'roomId') {
+        type.value = false
+      }
+      if (value === 'time') {
+        show.value = false
+      }
+    }
+    // 房间数量
+    const roomNum = ref(null)
+    // 入住时间：
+    const currentDate = ref(new Date())
+    const minDate = new Date()
+    const maxDate = new Date(2025, 10, 1)
+    const show = ref(false) // 是否展示选择时间框
+    const endOrstart = ref(0)
+    const handleBookTime = (flag) => {
+      if (flag === 'start') {
+        show.value = true
+        endOrstart.value = 0
+      }
+      if (flag === 'end') {
+        show.value = true
+        endOrstart.value = 1
+      }
+    }
+    // 确定时间
+    const handleSubmitTime = (value) => {
+      if (endOrstart.value === 0) {
+        if (!roomType.value) {
+          Toast('请先选择房间类型')
+          return
+        }
+        bookDate.value = utils.formateDate(new Date(value))
+        show.value = false
+      }
+      if (endOrstart.value === 1) {
+        if (!bookDate.value) {
+          Toast('请先选择开始时间')
+          return
+        }
+        endDate.value = utils.formateDate(new Date(value))
+        show.value = false
+        getRoomList()
+      }
+    }
+    // 获取可用房间列表：
+    const canBookRoomList = ref([])
+    const getRoomList = async () => {
+      const res = await get(`dqbook/use?dqRoomId=${roomId.value}&bookDate=${bookDate.value}&endDate=${endDate.value}`)
+      canBookRoomList.value = res.data
+    }
+    // 提交：
+    onsubmit = () => {
+      proxy.$refs.message.validate().then(async () => {
         if (!username.value) {
           Toast('姓名不能为空')
           return
@@ -90,149 +170,60 @@ export default {
           Toast('请选择房间类型')
           return
         }
-        if (!roomNumChoice.value) {
-          Toast('请选择房间号码')
+        if (!roomNum.value) {
+          Toast('请输入房间数量')
           return
         }
-        if (!endData.value || !bookData.value) {
+        if (!endDate.value || !bookDate.value) {
           Toast('请选择时间段')
           return
         }
-        if (canOrder.value === 1) {
-          Toast('暂不能预约，请更换预约时间或者房间号')
+        if (canBookRoomList.value.length === 0) {
+          Toast('抱歉，暂时没有房间可以预定')
           return
         }
-        const res = await post('dqbook/book', {
-          roomId: roomId.value,
-          username: username.value,
-          phone: phone.value,
-          bookDate: bookData.value,
-          endDate: endData.value
-        })
-        if (res.data === 1) {
-          Toast('预定成功')
-          roomId.value = ''
-          username.value = ''
-          phone.value = ''
-          bookData.value = ''
-          endData.value = ''
-          // 房间类型恢复为空
-          roomType.value = ''
-          // 号码为空
-          roomNumChoice.value = ''
+        if (roomNum.value > canBookRoomList.value.length) {
+          Toast(`抱歉，最多只能预定${canBookRoomList.value.length}个房间`)
+          return
+        }
+        let OK = true // 默认成功
+        let list = ''
+        for (let item = 0; item < roomNum.value; item++) {
+          const res = await bookRoom(canBookRoomList.value[item])
+          if (res.code !== 200) { OK = false } // 只要一个预定失败，那就预定失败
+          list += ` ${canBookRoomList.value[item]}`
+        }
+        if (OK) {
+          Toast(`预定成功，房间号为：${list}`)
+          setTimeout(() => {
+            router.push('/')
+          }, 2000)
         } else {
-          Toast('预定失败')
+          Toast('预定失败，请重试！')
         }
       }).catch(() => {
         Toast('请输入正确信息格式！')
       })
     }
-    // 选择房间类型
-    const id = ref(null)
-    const type = ref(false) // 展示与否
-    const roomType = ref(null)
-    const roomId = ref(null)
-    const columnsType = ['普通标准间', '舒适标准间', '豪华标准间', '豪华大床房', '豪华套房']
-    const onConfirmA = async (value, index) => {
-      roomType.value = value
-      type.value = false
-      if (value === '普通标准间') {
-        id.value = 1
-        const result = await get(`dqroom/roomnumber?roomId=${id.value}`)
-        columnsNumber.value = result.data
-      }
-      if (value === '舒适标准间') {
-        id.value = 2
-        const result = await get(`dqroom/roomnumber?roomId=${id.value}`)
-        columnsNumber.value = result.data
-      }
-      if (value === '豪华标准间') {
-        id.value = 3
-        const result = await get(`dqroom/roomnumber?roomId=${id.value}`)
-        columnsNumber.value = result.data
-      }
-      if (value === '豪华大床房') {
-        id.value = 4
-        const result = await get(`dqroom/roomnumber?roomId=${id.value}`)
-        columnsNumber.value = result.data
-      }
-      if (value === '豪华套房') {
-        id.value = 5
-        const result = await get(`dqroom/roomnumber?roomId=${id.value}`)
-        columnsNumber.value = result.data
-      }
+    // 预定房间---循环实现
+    const bookRoom = async (roomId) => {
+      const res = await post('dqbook/book', {
+        roomId: roomId,
+        username: username.value,
+        phone: phone.value,
+        remarks: remarks.value,
+        bookDate: bookDate.value,
+        endDate: endDate.value
+      })
+      // console.log(res)
+      return res
     }
-    // 房间号码
-    const handleChoiceNum = (index) => {
-      if (!roomType.value) {
-        Toast('请先选择房间类型')
-        return
-      }
-      numChoice.value = true
-    }
-    const onCancel = () => {
-      type.value = false
-      numChoice.value = false
-      show.value = false
-    }
-    // 后退
+    // 返回
     const router = useRouter()
     const handleBack = () => {
       router.back()
     }
-    // 房间号码
-    const numChoice = ref(false)
-    const roomNumChoice = ref(null)
-    const columnsNumber = ref([])
-    const onConfirmB = (value, index) => {
-      roomId.value = value
-      roomNumChoice.value = value
-      numChoice.value = false
-    }
-    // 选择时间
-    const currentDate = ref(new Date())
-    const minDate = new Date()
-    const maxDate = new Date(2025, 10, 1)
-    // 展示与否时间选择器
-    const show = ref(false)
-    const startOrEnd = ref(0) // 默认是结束
-    const handleTime = (value) => {
-      show.value = true
-      startOrEnd.value = value
-    }
-    // 开始时间和结束时间
-    const bookData = ref('')
-    const endData = ref('')
-    const handleSubmitTime = async (index) => {
-      if (startOrEnd.value === 0) {
-        if (!roomNumChoice.value) {
-          Toast('请先选择房间号码')
-          return
-        }
-        bookData.value = utils.formateDate(new Date(index))
-        show.value = false
-      }
-      if (startOrEnd.value === 1) {
-        if (!roomNumChoice.value) {
-          Toast('请先选择房间号码')
-          return
-        }
-        if (!bookData.value) {
-          Toast('请选择预定开始时间')
-          return
-        }
-        endData.value = utils.formateDate(new Date(index))
-        show.value = false
-        const res = await get(`/dqbook/check?roonNumber=${roomNumChoice.value}&bookDate=${bookData.value}&endDate=${endData.value}`)
-        console.log(res)
-        canOrder.value = res.data
-        if (res.data !== 0) {
-          Toast('暂不能预约，请更换预约时间或者房间号')
-        }
-      }
-    }
-
-    return { bookData, endData, handleChoiceNum, currentDate, minDate, handleSubmitTime, maxDate, show, handleTime, message, roomType, numChoice, roomNumChoice, username, phone, columnsType, columnsNumber, onCancel, onConfirmA, onConfirmB, type, handleBack }
+    return { handleBack, message, username, phone, bookDate, endDate, remarks, columnsType, type, confirmRoomId, onCancel, handleBookTime, show, currentDate, minDate, maxDate, roomType, handleSubmitTime, roomNum }
   }
 }
 </script>
