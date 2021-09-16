@@ -6,6 +6,8 @@
     </div>
     <!-- 轮播图 -->
     <Swiper :ImageList="ImageList"/>
+    <!-- 疫情信息介绍 -->
+    <Info/>
     <!-- 房间介绍 -->
     <List message="卧室列表"/>
     <Room :roomList="roomList" />
@@ -24,12 +26,13 @@ import List from '../components/List.vue'
 import Room from '../components/Room.vue'
 import About from '../components/About.vue'
 import { get } from '../util/request'
+import Info from '../components/Info.vue'
 
 const roomList = ref([])
 const ImageList = ref([])
 export default {
   name: 'Home',
-  components: { Swiper, List, Room, About },
+  components: { Swiper, List, Room, About, Info },
   setup () {
     const getAllList = async () => {
       const res = await get('/dqroom/list')
